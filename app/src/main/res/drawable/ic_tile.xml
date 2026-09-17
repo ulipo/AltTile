@@ -1,6 +1,11 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="48dp" android:height="48dp"
-    android:viewportWidth="48" android:viewportHeight="48">
-    <path android:fillColor="#FFFFFFFF"
-        android:pathData="M24,4A20,20 0,1 0,24 44A20,20 0,1 0,24 4M24,10L34,26H28V38H20V26H14Z"/>
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Simple mountain silhouette for the Quick Settings tile. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M4,40 L16,18 L22,28 L29,10 L44,40 Z M16,18 L20,25 L22,28 L18,25 Z M29,10 L25,24 L29,20 L33,26 L44,40 L40,40 L29,25 L20,40 L10,40 L16,29 L12,35 Z" />
 </vector>
