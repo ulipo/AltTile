@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layer monocromatico per Android 13+ (Themed Icons) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sagoma con occhi intagliati (Compound Path) -->
+    <path
+        android:fillColor="#FF000000"
+        android:fillType="evenOdd"
+        android:pathData="M27,76 
+                  C22,76 21,70 24,65 
+                  L42,27 
+                  C44,23 48,23 50,27 
+                  L56,38 
+                  L73,32 
+                  C77,31 80,35 78,39 
+                  L84,59 
+                  C86,66 82,76 72,76 
+                  Z
+                  M43,65 A6,6 0 1,1 43,53 A6,6 0 1,1 43,65 Z
+                  M67,65 A6,6 0 1,1 67,53 A6,6 0 1,1 67,65 Z" />
+
+</vector>

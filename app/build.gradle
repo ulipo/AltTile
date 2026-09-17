@@ -8,8 +8,11 @@ android {
         applicationId 'com.example.gpsaltitudetile'
         minSdk 26
         targetSdk 35
-        versionCode 1
-        versionName '1.0'
+
+        // Legge le proprietà passate da GitHub Actions (-PversionCode e -PversionName)
+        // Se compilato in locale, usa i valori predefiniti 1 e '1.0'
+        versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1
+        versionName project.hasProperty('versionName') ? project.property('versionName') : '1.0'
     }
 
     compileOptions {
