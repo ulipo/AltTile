@@ -1,44 +1,46 @@
-# GPS Altitude Tile
+# AltTile — altimetro nelle Quick Settings
 
-Progetto Android/AndroidIDE per una Quick Settings Tile che:
-- avvia/arresta la misurazione GPS con un tap;
-- mostra l'altitudine direttamente nella tile (es. `842 m`), preferendo l'altitudine sul livello medio del mare (MSL) quando fornita da Android;
-- usa il provider GPS/GNSS;
-- richiede il permesso di posizione precisa;
-- è predisposto per lo spegnimento dopo 30 s con schermo spento.
+AltTile visualizza la quota direttamente nella tile delle impostazioni rapide Android.
+Tocca la tile per avviare o fermare il rilevamento. Dopo 30 secondi a schermo
+spento il servizio GPS viene arrestato automaticamente.
 
-## Compilazione con AndroidIDE
-1. Estrai questo ZIP.
-2. Apri la cartella come progetto Gradle in AndroidIDE.
-3. Lascia che Gradle sincronizzi il progetto.
-4. Build > Assemble Debug.
-5. Installa `app/build/outputs/apk/debug/app-debug.apk`.
+## Funzionamento
 
-## Aggiunta della tile
-Dopo l'installazione:
-- apri il pannello Quick Settings;
-- Modifica / aggiungi tile;
-- aggiungi `GPS Altitude`.
+- Posizione fusa Android, con fallback al GPS dove necessario.
+- Richiesta posizione ogni 2,5 secondi; tile e notifica aggiornate solo quando serve.
+- Su Android 14+ conversione WGS84 → MSL (livello medio del mare) quando il
+  provider non offre già una quota MSL. La conversione avviene fuori dal thread UI.
+- Quando MSL non è disponibile, il valore è la quota ellissoidica WGS84:
+  il simbolo `~` avvisa che non va interpretato come quota sul livello del mare.
+  `~` segnala anche una stima con precisione verticale limitata.
+- Un servizio separato dal pannello Quick Settings gestisce la localizzazione.
+  Il servizio non si riavvia automaticamente dopo l'arresto del processo.
+- Un wakelock limitato a circa 35 secondi permette di rispettare il timer
+  di spegnimento anche quando il telefono va in sospensione.
+- Nessuna cronologia delle posizioni viene memorizzata. Spegnendo la tile
+  viene cancellata anche l'ultima quota visualizzata.
 
-## Permesso di posizione in background (obbligatorio)
-Da Android 10 in poi, il permesso di posizione precisa concesso normalmente
-("Consenti solo durante l'utilizzo dell'app") **non basta**: la tile legge il
-GPS anche mentre l'app non è in primo piano, quindi Android richiede il
-livello di permesso più alto, "Consenti sempre".
+## Installazione
 
-Senza questo permesso la tile si attiva ma non riceve mai posizioni valide
-(resta su "Acquisizione segnale GPS in corso..." o non aggiorna l'altitudine).
+Installa un APK generato dal workflow GitHub Actions **Build APK** e aggiungi
+**GPS Altitude** al pannello Quick Settings.
 
-Per concederlo:
-1. Apri l'app **GPS Altitude Tile** almeno una volta e concedi il permesso di
-   posizione quando richiesto (primo dialog: "Consenti solo durante
-   l'utilizzo dell'app" o "Consenti").
-2. Vai in **Impostazioni di sistema > App > GPS Altitude Tile > Permessi >
-   Posizione**.
-3. Seleziona **"Consenti sempre"** (su alcuni produttori: "Consenti tutto il
-   tempo" / "Always allow").
+Apri l'app e concedi il permesso di posizione **precisa**. Su Android 10+
+occorre anche **Consenti sempre**, da *Impostazioni > App > GPS Altitude Tile >
+Permessi > Posizione*, perché la tile può avviare il GPS senza un'Activity
+visibile. Se manca un permesso, un tocco sulla tile apre le istruzioni.
 
-Questo passaggio non può essere completato con un solo tap dentro l'app:
-a partire da Android 11, il sistema obbliga a concedere "Consenti sempre"
-tramite le Impostazioni, non tramite il dialog di richiesta permessi
-standard. L'app può solo guidarti fino a quella schermata (vedi sotto).
+## Compilazione
+
+Progetto Java/Gradle (minSdk 26, targetSdk 35). Compila con
+`./gradlew assembleDebug` oppure GitHub Actions. Il keystore presente nel
+repository è **solo di debug**: per una distribuzione pubblica occorre una
+chiave di firma di release privata.
+
+## Limiti
+
+La qualità dell'altitudine dipende dal dispositivo, dalla qualità del
+segnale e dai dati disponibili. Android precedenti alla versione 14
+non garantiscono la conversione MSL se il provider non fornisce già quel dato.
+
+Progetto realizzato tramite **vibe-coding**.
