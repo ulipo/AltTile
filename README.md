@@ -1,46 +1,36 @@
-# AltTile — altimetro nelle Quick Settings
+# AltTile — Altimetro nelle Quick Settings
 
-AltTile visualizza la quota direttamente nella tile delle impostazioni rapide Android.
-Tocca la tile per avviare o fermare il rilevamento. Dopo 30 secondi a schermo
-spento il servizio GPS viene arrestato automaticamente.
+AltTile permette di accendere e spegnere il GPS dalle impostazioni rapide
+di Android e visualizza la quota direttamente nella tile.
 
-## Funzionamento
+## Funzioni
 
-- Posizione fusa Android, con fallback al GPS dove necessario.
-- Richiesta posizione ogni 2,5 secondi; tile e notifica aggiornate solo quando serve.
-- Su Android 14+ conversione WGS84 → MSL (livello medio del mare) quando il
-  provider non offre già una quota MSL. La conversione avviene fuori dal thread UI.
-- Quando MSL non è disponibile, il valore è la quota ellissoidica WGS84:
-  il simbolo `~` avvisa che non va interpretato come quota sul livello del mare.
-  `~` segnala anche una stima con precisione verticale limitata.
-- Un servizio separato dal pannello Quick Settings gestisce la localizzazione.
-  Il servizio non si riavvia automaticamente dopo l'arresto del processo.
-- Un wakelock limitato a circa 35 secondi permette di rispettare il timer
-  di spegnimento anche quando il telefono va in sospensione.
-- Nessuna cronologia delle posizioni viene memorizzata. Spegnendo la tile
-  viene cancellata anche l'ultima quota visualizzata.
+- Acquisizione GNSS esplicita dal provider GPS Android, senza dipendere da
+  un provider fuso che potrebbe non accendere il ricevitore satellitare.
+- Richiesta di posizione ogni 2 secondi, anche da fermi.
+- La tile e la notifica vengono aggiornate solo se cambia la quota arrotondata
+  o il suo riferimento altimetrico.
+- Preferisce la quota MSL (livello medio del mare) quando il provider la offre.
+  In caso contrario mostra la quota ellissoidica WGS84 con prefisso `~`,
+  per non indicarla erroneamente come quota sul livello del mare.
+- La rilevazione si arresta automaticamente dopo 30 secondi a schermo spento
+  (il sistema può differire l'esecuzione del timer se sospende il processo:
+  alla riaccensione viene ricontrollato il tempo trascorso).
+- La localizzazione viene interrotta quando si spegne la tile.
 
-## Installazione
+## Installazione e permessi
 
-Installa un APK generato dal workflow GitHub Actions **Build APK** e aggiungi
-**GPS Altitude** al pannello Quick Settings.
+Installa l'APK creato da GitHub Actions, apri l'app e concedi la
+**posizione precisa**. Su Android 10+ è richiesto anche il permesso
+**Consenti sempre** nelle impostazioni di posizione dell'app, perché il
+riquadro Quick Settings viene usato senza un'Activity visibile.
 
-Apri l'app e concedi il permesso di posizione **precisa**. Su Android 10+
-occorre anche **Consenti sempre**, da *Impostazioni > App > GPS Altitude Tile >
-Permessi > Posizione*, perché la tile può avviare il GPS senza un'Activity
-visibile. Se manca un permesso, un tocco sulla tile apre le istruzioni.
+Aggiungi quindi il riquadro **GPS Altitude** alle Quick Settings.
 
-## Compilazione
+## Sviluppo
 
-Progetto Java/Gradle (minSdk 26, targetSdk 35). Compila con
-`./gradlew assembleDebug` oppure GitHub Actions. Il keystore presente nel
-repository è **solo di debug**: per una distribuzione pubblica occorre una
-chiave di firma di release privata.
+Progetto Android Java/Gradle, minSdk 26, targetSdk 35.
+Compila con `./gradlew assembleDebug` o il workflow GitHub Actions.
+Il keystore nel repository è di debug, non idoneo a una distribuzione release.
 
-## Limiti
-
-La qualità dell'altitudine dipende dal dispositivo, dalla qualità del
-segnale e dai dati disponibili. Android precedenti alla versione 14
-non garantiscono la conversione MSL se il provider non fornisce già quel dato.
-
-Progetto realizzato tramite **vibe-coding**.
+L'app è stata realizzata tramite **vibe-coding**.
