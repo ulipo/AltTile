@@ -8,8 +8,34 @@ android {
         applicationId 'com.example.gpsaltitudetile'
         minSdk 26
         targetSdk 35
-        versionCode 1
-        versionName '1.0'
+
+        // Legge le proprietà passate da GitHub Actions (-PversionCode e -PversionName)
+        // Se compilato in locale, usa i valori predefiniti 1 e '1.0'
+        versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1
+        versionName project.hasProperty('versionName') ? project.property('versionName') : '1.0'
+    }
+
+    // Keystore di debug fisso, committato in repo (debug.keystore nella root del
+    // progetto). Senza questo blocco, Android Gradle Plugin userebbe il keystore
+    // di debug automatico (~/.android/debug.keystore): su GitHub Actions, dove
+    // ogni run parte da una VM pulita, quel file non esiste mai e ne viene
+    // rigenerato uno nuovo con chiave casuale ad ogni build, cambiando la firma
+    // a ogni compilazione e impedendo l'aggiornamento dell'app senza disinstallarla.
+    // Credenziali standard del keystore di debug Android: non è un segreto da
+    // proteggere, serve solo a rendere la firma stabile tra una build e l'altra.
+    signingConfigs {
+        debug {
+            storeFile rootProject.file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
     }
 
     compileOptions {
