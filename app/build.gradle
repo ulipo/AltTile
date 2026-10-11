@@ -1,4 +1,27 @@
+import java.util.Properties
+
 plugins { id 'com.android.application' }
+
+// Use GitHub Actions secrets, or an ignored local keystore.properties file.
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+if (keystorePropertiesFile.isFile()) {
+    keystorePropertiesFile.withInputStream { stream -> keystoreProperties.load(stream) }
+}
+def signingValue = { String property, String environment ->
+    def value = System.getenv(environment)
+    if (value == null || value.trim().isEmpty()) {
+        value = keystoreProperties.getProperty(property)
+    }
+    return value != null && !value.trim().isEmpty() ? value : null
+}
+def signingStorePath = signingValue('storeFile', 'ALTTILE_STORE_FILE')
+def signingStorePassword = signingValue('storePassword', 'ALTTILE_STORE_PASSWORD')
+def signingKeyAlias = signingValue('keyAlias', 'ALTTILE_KEY_ALIAS')
+def signingKeyPassword = signingValue('keyPassword', 'ALTTILE_KEY_PASSWORD')
+def signingConfigured = [
+        signingStorePath, signingStorePassword, signingKeyAlias, signingKeyPassword
+].every { it != null }
 
 android {
     namespace 'com.example.gpsaltitudetile'
@@ -8,33 +31,29 @@ android {
         applicationId 'com.example.gpsaltitudetile'
         minSdk 26
         targetSdk 35
-
-        // Legge le proprietà passate da GitHub Actions (-PversionCode e -PversionName)
-        // Se compilato in locale, usa i valori predefiniti 1 e '1.0'
         versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1
         versionName project.hasProperty('versionName') ? project.property('versionName') : '1.0'
     }
 
-    // Keystore di debug fisso, committato in repo (debug.keystore nella root del
-    // progetto). Senza questo blocco, Android Gradle Plugin userebbe il keystore
-    // di debug automatico (~/.android/debug.keystore): su GitHub Actions, dove
-    // ogni run parte da una VM pulita, quel file non esiste mai e ne viene
-    // rigenerato uno nuovo con chiave casuale ad ogni build, cambiando la firma
-    // a ogni compilazione e impedendo l'aggiornamento dell'app senza disinstallarla.
-    // Credenziali standard del keystore di debug Android: non è un segreto da
-    // proteggere, serve solo a rendere la firma stabile tra una build e l'altra.
     signingConfigs {
-        debug {
-            storeFile rootProject.file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+        altTileRelease {
+            if (signingConfigured) {
+                storeFile rootProject.file(signingStorePath)
+                storePassword signingStorePassword
+                keyAlias signingKeyAlias
+                keyPassword signingKeyPassword
+            }
         }
     }
 
     buildTypes {
-        debug {
-            signingConfig signingConfigs.debug
+        // Debug builds use the locally generated Android debug key.
+        debug { }
+        release {
+            minifyEnabled false
+            if (signingConfigured) {
+                signingConfig signingConfigs.altTileRelease
+            }
         }
     }
 
@@ -46,4 +65,11 @@ android {
 
 dependencies {
     implementation 'androidx.core:core:1.15.0'
+}
+
+// Fail closed: never distribute an unsigned CI release.
+if (System.getenv('CI') == 'true' && !signingConfigured) {
+    throw new GradleException('AltTile release signing is not configured. ' +
+            'Set ALTTILE_STORE_FILE, ALTTILE_STORE_PASSWORD, ' +
+            'ALTTILE_KEY_ALIAS and ALTTILE_KEY_PASSWORD.')
 }

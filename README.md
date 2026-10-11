@@ -31,6 +31,6 @@ Aggiungi quindi il riquadro **GPS Altitude** alle Quick Settings.
 
 Progetto Android Java/Gradle, minSdk 26, targetSdk 35.
 Compila con `./gradlew assembleDebug` o il workflow GitHub Actions.
-Il keystore nel repository è di debug, non idoneo a una distribuzione release.
+Le release sono firmate tramite GitHub Secrets. La chiave privata non è più nel ramo corrente del repository; consulta [SIGNING.md](SIGNING.md) per configurazione e migrazione dagli APK precedenti.
 
 L'app è stata realizzata tramite **vibe-coding**.

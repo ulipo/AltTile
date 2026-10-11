@@ -8,3 +8,12 @@
 .externalNativeBuild
 .cxx
 app/build/
+
+# Private Android signing material: never commit.
+*.jks
+*.jks.*
+*.keystore
+*.p12
+*.pfx
+keystore.properties
+*.base64
